@@ -3,13 +3,12 @@ package main
 import (
 	"fmt"
 
-	"golang.org/x/crypto/sha3"
-
-	"github.com/mr-tron/base58"
-	"github.com/multiformats/go-multihash"
-	"github.com/ockam-network/did"
+	"github.com/iotexproject/iotex-DID/protocol"
 )
 
 func main() {
-	
+	err := protocol.ProcessPbkey()
+	if err != nil {
+		fmt.Println(err)
+	}
 }
