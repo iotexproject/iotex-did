@@ -9,10 +9,9 @@ import (
 	"github.com/iotexproject/iotex-address/address"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/mr-tron/base58"
-	"github.com/multiformats/go-multihash"
-	"golang.org/x/crypto/sha3"
+	"github.com/ethereum/go-ethereum/common"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/iotexproject/iotex-antenna-go/v2/account"
 	"github.com/iotexproject/iotex-antenna-go/v2/iotex"
 	"github.com/iotexproject/iotex-antenna-go/v2/utils/wait"
@@ -23,22 +22,50 @@ const (
 	host = "api.testnet.iotex.one:443"
 )
 
-const contractAddress = "io1hfgtmdc27uzd7g47ky42q00wt9z37st87ghqjp"
+const contractAddress = "io1xdvynq9krzq26f29qzzzqypkmng4l28vk7pnx7"
+const testURIContract = "io1l2gl0p5d2yxk8a6fnhjurcjnehp2zdxsts8k68"
 
 const constDID = `[
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "value",
+				"type": "bytes32"
+			}
+		],
+		"name": "getHexString",
+		"outputs": [
+			{
+				"name": "",
+				"type": "string"
+			}
+		],
+		"payable": false,
+		"stateMutability": "pure",
+		"type": "function"
+	},
 	{
 		"constant": false,
 		"inputs": [
 			{
-				"name": "idStr",
+				"name": "inputHash",
 				"type": "string"
+			},
+			{
+				"name": "userType",
+				"type": "uint16"
+			},
+			{
+				"name": "meta",
+				"type": "bytes"
 			}
 		],
 		"name": "createDID",
 		"outputs": [
 			{
-				"name": "success",
-				"type": "bool"
+				"name": "resultDID",
+				"type": "string"
 			}
 		],
 		"payable": true,
@@ -49,15 +76,57 @@ const constDID = `[
 		"constant": false,
 		"inputs": [
 			{
-				"name": "idStr",
+				"name": "didString",
 				"type": "string"
 			}
 		],
-		"name": "isExist",
+		"name": "getURI",
+		"outputs": [
+			{
+				"name": "uri",
+				"type": "string"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "userType",
+				"type": "uint16"
+			},
+			{
+				"name": "addr",
+				"type": "address"
+			}
+		],
+		"name": "addType",
 		"outputs": [
 			{
 				"name": "success",
 				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "inputHash",
+				"type": "string"
+			}
+		],
+		"name": "getDID",
+		"outputs": [
+			{
+				"name": "did",
+				"type": "string"
 			}
 		],
 		"payable": false,
@@ -72,18 +141,20 @@ const constDID = `[
 	}
 ]`
 
-// ProcessPbkey is processing public key to DID
-func ProcessPbkey() error {
+// IoAddrToEvmAddr converts IoTeX address into evm address
+func IoAddrToEvmAddr(ioAddr string) (common.Address, error) {
+	address, err := address.FromString(ioAddr)
+	if err != nil {
+		return common.Address{}, err
+	}
+	return common.BytesToAddress(address.Bytes()), nil
+}
+
+// CreateDIDByProcessPbkey is processing public key to DID
+func CreateDIDByProcessPbkey() error {
 	// hash the public key
-	pbKey := "029a4774d543094deaf342663ae672728e12f03b3b6d9816b0b79995fade0fab23"
-	pbHash := sha3.Sum256([]byte(pbKey))
-	idString := pbHash[:]
-	idString = pbHash[len(idString)-20:]
-	// prepend the multihash label for the hash algo, skip the varint length of the multihash, since that is fixed to 20
-	idString = append([]byte{multihash.SHA3_256}, idString...)
-	// base58 encode the above value
-	id := base58.Encode(idString)
-	d := "did:iotex:" + id
+	pbKey := "029a4774d543094deaf342663e672724e2f03b3b6d9816b0b79995fade0fab23"
+
 	// we got our DID in d variable
 	// Create grpc connection
 	conn, err := iotex.NewDefaultGRPCConn(host)
@@ -107,16 +178,39 @@ func ProcessPbkey() error {
 		return err
 	}
 	didContract := c.Contract(didContractAddress, didABI)
-	result := didContract.Execute("createDID", d).SetGasLimit(5000000)
+	result := didContract.Execute("createDID", pbKey, uint16(0), []byte("")).SetGasLimit(4000000)
 	if err := wait.Wait(context.Background(), result); err != nil {
 		return err
 	}
-	result1, err := didContract.Read("isExist", d).Call(context.Background())
-	var inte bool
-	if err := result1.Unmarshal(&inte); err != nil {
+	uriAddress, err := IoAddrToEvmAddr(testURIContract)
+	if err != nil {
 		return err
 	}
 
-	fmt.Println(inte)
+	addType := didContract.Execute("addType", uint16(0), uriAddress).SetGasLimit(4000000)
+	if err := wait.Wait(context.Background(), addType); err != nil {
+		return err
+	}
+
+	resultRead, err := didContract.Read("getDID", pbKey).Call(context.Background())
+	if err != nil {
+
+		return err
+	}
+	var did string
+	if err := resultRead.Unmarshal(&did); err != nil {
+
+		return err
+	}
+	result2, err := didContract.Read("getURI", did).Call(context.Background())
+	if err != nil {
+		return err
+	}
+	var uri string
+	if err := result2.Unmarshal(&uri); err != nil {
+		return err
+	}
+
+	fmt.Println(uri)
 	return nil
 }
