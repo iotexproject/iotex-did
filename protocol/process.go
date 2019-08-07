@@ -2,16 +2,15 @@ package protocol
 
 import (
 	"context"
-	"fmt"
+	"database/sql"
 	"log"
 	"strings"
 
-	"github.com/iotexproject/iotex-address/address"
-
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
-
 	_ "github.com/go-sql-driver/mysql"
+
+	"github.com/iotexproject/iotex-address/address"
 	"github.com/iotexproject/iotex-antenna-go/v2/account"
 	"github.com/iotexproject/iotex-antenna-go/v2/iotex"
 	"github.com/iotexproject/iotex-antenna-go/v2/utils/wait"
@@ -150,8 +149,8 @@ func IoAddrToEvmAddr(ioAddr string) (common.Address, error) {
 	return common.BytesToAddress(address.Bytes()), nil
 }
 
-// CreateDIDByProcessPbkey is processing public key to DID
-func CreateDIDByProcessPbkey() error {
+// CreateDIDByPbkey is processing public key to DID
+func CreateDIDByPbkey() error {
 	// hash the public key
 	pbKey := "029a4774d543094deaf342663e672724e2f03b3b6d9816b0b79995fade0fab23"
 
@@ -182,6 +181,7 @@ func CreateDIDByProcessPbkey() error {
 	if err := wait.Wait(context.Background(), result); err != nil {
 		return err
 	}
+
 	uriAddress, err := IoAddrToEvmAddr(testURIContract)
 	if err != nil {
 		return err
@@ -206,11 +206,16 @@ func CreateDIDByProcessPbkey() error {
 	if err != nil {
 		return err
 	}
+
 	var uri string
 	if err := result2.Unmarshal(&uri); err != nil {
 		return err
 	}
+	db, err := sql.Open("mysql", uri+"?autocommit=false")
+	if err != nil {
+		return err
+	}
+	defer db.Close()
 
-	fmt.Println(uri)
 	return nil
 }

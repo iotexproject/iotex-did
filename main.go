@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	err := protocol.CreateDIDByProcessPbkey()
+	err := protocol.CreateDIDByPbkey()
 	if err != nil {
 		fmt.Println(err)
 	}
