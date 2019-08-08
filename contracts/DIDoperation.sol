@@ -35,6 +35,11 @@ contract DecentralizedIdentifier {
         generateMethods[userType] = abURI;
         success = true;
     }
+    function deleteDID(string did) public returns(bool success)
+    {
+        require(dids[did].exist, "did do not exist");
+        dids[did].exist = false;
+    }
     function getURI(string didString) public returns(string uri){
         DID storage did = dids[didString];
         require(did.exist, "");

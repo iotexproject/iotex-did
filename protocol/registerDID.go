@@ -3,6 +3,7 @@ package protocol
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"log"
 	"strings"
 
@@ -21,6 +22,8 @@ const (
 	host = "api.testnet.iotex.one:443"
 )
 
+const databaseName = "testDID"
+const tableName = "didDocumentation"
 const contractAddress = "io1xdvynq9krzq26f29qzzzqypkmng4l28vk7pnx7"
 const testURIContract = "io1l2gl0p5d2yxk8a6fnhjurcjnehp2zdxsts8k68"
 
@@ -132,13 +135,17 @@ const constDID = `[
 		"stateMutability": "nonpayable",
 		"type": "function"
 	},
-	{
+	{	
 		"inputs": [],
 		"payable": false,
 		"stateMutability": "nonpayable",
 		"type": "constructor"
 	}
 ]`
+
+type PbKey struct {
+	PbKeyHex string
+}
 
 // IoAddrToEvmAddr converts IoTeX address into evm address
 func IoAddrToEvmAddr(ioAddr string) (common.Address, error) {
@@ -152,7 +159,8 @@ func IoAddrToEvmAddr(ioAddr string) (common.Address, error) {
 // CreateDIDByPbkey is processing public key to DID
 func CreateDIDByPbkey() error {
 	// hash the public key
-	pbKey := "029a4774d543094deaf342663e672724e2f03b3b6d9816b0b79995fade0fab23"
+	pbKey := "029a4774d53094deaf342663e672724e2f03b3b6d9816b0b79995fade0fab23"
+	contextContent := "www.iotex.io"
 
 	// we got our DID in d variable
 	// Create grpc connection
@@ -211,11 +219,24 @@ func CreateDIDByPbkey() error {
 	if err := result2.Unmarshal(&uri); err != nil {
 		return err
 	}
-	db, err := sql.Open("mysql", uri+"?autocommit=false")
+
+	var pbArray []*PbKey
+	pbArray = append(pbArray, &PbKey{PbKeyHex: pbKey})
+	publicKeyData, err := json.Marshal(pbArray)
+	if err != nil {
+		return err
+	}
+
+	db, err := sql.Open("mysql", uri+"?autocommit=true")
 	if err != nil {
 		return err
 	}
 	defer db.Close()
+	resultSQL, err := db.Prepare("INSERT INTO didDocumentation (DID,context,public_key) VALUES (?,?,?)")
+	resultSQL.Exec(did, contextContent, publicKeyData)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
