@@ -3,6 +3,7 @@ module github.com/iotexproject/iotex-DID
 go 1.12
 
 require (
+	github.com/766b/go-outliner v0.0.0-20180511142203-fc6edecdadd7 // indirect
 	github.com/allegro/bigcache v1.2.1 // indirect
 	github.com/elastic/gosigar v0.10.4 // indirect
 	github.com/ethereum/go-ethereum v1.8.27

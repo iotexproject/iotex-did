@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"strings"
 
@@ -24,7 +25,7 @@ const (
 
 const databaseName = "testDID"
 const tableName = "didDocumentation"
-const contractAddress = "io1xdvynq9krzq26f29qzzzqypkmng4l28vk7pnx7"
+const contractAddress = "io1vwzr8lh44fx0t0ac29jxvf8d7y0ft2gpa9a087"
 const testURIContract = "io1l2gl0p5d2yxk8a6fnhjurcjnehp2zdxsts8k68"
 
 const constDID = `[
@@ -45,6 +46,25 @@ const constDID = `[
 		],
 		"payable": false,
 		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "did",
+				"type": "string"
+			}
+		],
+		"name": "deleteDID",
+		"outputs": [
+			{
+				"name": "success",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
@@ -135,7 +155,7 @@ const constDID = `[
 		"stateMutability": "nonpayable",
 		"type": "function"
 	},
-	{	
+	{
 		"inputs": [],
 		"payable": false,
 		"stateMutability": "nonpayable",
@@ -156,19 +176,12 @@ func IoAddrToEvmAddr(ioAddr string) (common.Address, error) {
 	return common.BytesToAddress(address.Bytes()), nil
 }
 
-// CreateDIDByPbkey is processing public key to DID
-func CreateDIDByPbkey() error {
-	// hash the public key
-	pbKey := "029a4774d53094deaf342663e672724e2f03b3b6d9816b0b79995fade0fab23"
-	contextContent := "www.iotex.io"
-
-	// we got our DID in d variable
-	// Create grpc connection
+func connectTodidContract() (iotex.Contract, error) {
 	conn, err := iotex.NewDefaultGRPCConn(host)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer conn.Close()
+
 	// Add account by private key
 	acc, err := account.HexStringToAccount("16668401a3f686717b457bcde6c182cb46dffce81b3bff9ea23f6bd41ac4d54a")
 	if err != nil {
@@ -178,14 +191,32 @@ func CreateDIDByPbkey() error {
 	c := iotex.NewAuthedClient(iotexapi.NewAPIServiceClient(conn), acc)
 	didABI, err := abi.JSON(strings.NewReader(constDID))
 	if err != nil {
-		return err
+		return nil, err
 	}
 	didContractAddress, err := address.FromString(contractAddress)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	didContract := c.Contract(didContractAddress, didABI)
+	return didContract, nil
+}
+
+// CreateDIDByPbkey is processing public key to DID
+func CreateDIDByPbkey() error {
+	// hash the public key
+	pbKey := "029a4774d53094deaf342663e672724e2f03b3b6d9816b0b7995fade0fab23"
+	contextContent := "www.iotex.io"
+
+	// we got our DID in d variable
+	// Create grpc connection
+
+	didContract, err := connectTodidContract()
+	if err != nil {
+		return err
+	}
+
 	result := didContract.Execute("createDID", pbKey, uint16(0), []byte("")).SetGasLimit(4000000)
+	fmt.Println(111)
 	if err := wait.Wait(context.Background(), result); err != nil {
 		return err
 	}
@@ -210,13 +241,13 @@ func CreateDIDByPbkey() error {
 
 		return err
 	}
-	result2, err := didContract.Read("getURI", did).Call(context.Background())
+	resultURI, err := didContract.Read("getURI", did).Call(context.Background())
 	if err != nil {
 		return err
 	}
 
 	var uri string
-	if err := result2.Unmarshal(&uri); err != nil {
+	if err := resultURI.Unmarshal(&uri); err != nil {
 		return err
 	}
 
@@ -232,6 +263,7 @@ func CreateDIDByPbkey() error {
 		return err
 	}
 	defer db.Close()
+
 	resultSQL, err := db.Prepare("INSERT INTO didDocumentation (DID,context,public_key) VALUES (?,?,?)")
 	resultSQL.Exec(did, contextContent, publicKeyData)
 	if err != nil {
