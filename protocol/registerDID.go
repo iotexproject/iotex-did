@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"log"
 	"strings"
 
@@ -202,73 +201,70 @@ func connectTodidContract() (iotex.Contract, error) {
 }
 
 // CreateDIDByPbkey is processing public key to DID
-func CreateDIDByPbkey() error {
+func CreateDIDByPbkey(pbKey string, contextContent string) (string, error) {
 	// hash the public key
-	pbKey := "029a4774d53094deaf342663e672724e2f03b3b6d9816b0b7995fade0fab23"
-	contextContent := "www.iotex.io"
 
 	// we got our DID in d variable
 	// Create grpc connection
 
 	didContract, err := connectTodidContract()
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	result := didContract.Execute("createDID", pbKey, uint16(0), []byte("")).SetGasLimit(4000000)
-	fmt.Println(111)
 	if err := wait.Wait(context.Background(), result); err != nil {
-		return err
+		return "", err
 	}
 
 	uriAddress, err := IoAddrToEvmAddr(testURIContract)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	addType := didContract.Execute("addType", uint16(0), uriAddress).SetGasLimit(4000000)
 	if err := wait.Wait(context.Background(), addType); err != nil {
-		return err
+		return "", err
 	}
 
 	resultRead, err := didContract.Read("getDID", pbKey).Call(context.Background())
 	if err != nil {
 
-		return err
+		return "", err
 	}
 	var did string
 	if err := resultRead.Unmarshal(&did); err != nil {
 
-		return err
+		return "", err
 	}
 	resultURI, err := didContract.Read("getURI", did).Call(context.Background())
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	var uri string
 	if err := resultURI.Unmarshal(&uri); err != nil {
-		return err
+		return "", err
 	}
 
 	var pbArray []*PbKey
 	pbArray = append(pbArray, &PbKey{PbKeyHex: pbKey})
 	publicKeyData, err := json.Marshal(pbArray)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	db, err := sql.Open("mysql", uri+"?autocommit=true")
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer db.Close()
 
 	resultSQL, err := db.Prepare("INSERT INTO didDocumentation (DID,context,public_key) VALUES (?,?,?)")
 	resultSQL.Exec(did, contextContent, publicKeyData)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return did, nil
 }
