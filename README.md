@@ -2,11 +2,11 @@
 ### First Draft 1 Aug 2019
 
 A DID is an idenetfier which allow you to look up your own DID documentation on our IoTeX blockchain. This document specifies the IoTeX
-[DID Method](https://w3c-ccg.github.io/did-spec/#specific-did-method-schemes) [`did:iotex`].
+[DID Method](https://w3c-ccg.github.io/did-spec/#specific-did-method-schemes) [`did:io`].
 
 ## Method Name
 
-We use the `iotex` to be our method name and a formal DID using this method need begin with following prefix: `did:iotex` . Furthermore, all the chaaracter in the prefix need be in lowercase. The string after this prefix is `idString` part and its generated algorithm will be mentioned below in the section on [Specific Identifiers](#specific_identifiers).
+We use the `iotex` to be our method name and a formal DID using this method need begin with following prefix: `did:io` . Furthermore, all the chaaracter in the prefix need be in lowercase. The string after this prefix is `idString` part and its generated algorithm will be mentioned below in the section on [Specific Identifiers](#specific_identifiers).
 
 ## Specific Identifiers
 
@@ -14,7 +14,7 @@ IoTeX DIDs conform with [the Generic DID Scheme](https://w3c-ccg.github.io/did-s
 
 ```
 
-iotex-did 	   = "did:iotex" iotex-idString
+iotex-did 	   = "did:io" iotex-idString
 
 iotex-idString = 28*31(base58char)
 base58char     = "1" / "2" / "3" / "4" / "5" / "6" / "7" / "8" / "9" / "A" / "B" / "C"
@@ -70,7 +70,7 @@ func main(pbKey) {
 An example IoTeX DID:
 
 ```
-did:iotex:2MpPfHH14dhLbbDV8Va1SPJrCWZNf
+did:io:2MpPfHH14dhLbbDV8Va1SPJrCWZNf
 ```
 
 ## DID Documentation Resolution
