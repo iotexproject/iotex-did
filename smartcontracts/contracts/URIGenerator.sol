@@ -3,8 +3,8 @@ pragma solidity ^0.4.24;
 
 contract URIGenerator{
 
-    function generate(bytes meta) public returns(string uri){
-        uri = "root:Hanyuqing99@tcp(127.0.0.1:3306)/testDID";
+    function generate(string uuid) public returns (string) {
+        return "root:Hanyuqing99@tcp(127.0.0.1:3306)/testDID";
     }
 
 }

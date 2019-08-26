@@ -1,50 +1,58 @@
 pragma solidity ^0.4.24;
 
+import './ownership/Whitelist.sol';
+
 contract AbstractURI{
-    function generate(bytes meta) public returns(string);
+    function generate(string uuid) public returns (string);
 }
 
-contract DecentralizedIdentifier {
+contract DecentralizedIdentifier is Whitelist {
+    string constant didPrefix = "did:io:";
     struct DID {
         bool exist;
-        bytes meta;
-        uint16 userType;
-        uint8 status;
+        string nameSpace;
+        string uuid;
+        string hash;
+        uint256 timestamp;
     }
-    mapping(string => DID) dids; // 1,2,3 represent 3 status
-    mapping(string => string) hashToDID;
-    mapping(uint16 => AbstractURI) generateMethods;
+    mapping(string => DID) dids;
+    mapping(string => AbstractURI) nameSpaceToContract;
+
     constructor() public {
+        addAddressToWhitelist(msg.sender);
     }
-    function createDID(string inputHash, uint16 userType, bytes meta) public payable returns(string resultDID) {
-        bytes32 didString = keccak256(abi.encodePacked(inputHash));
-        resultDID = string(abi.encodePacked("did:iotex:",getHexString(didString)));
-        require(!dids[resultDID].exist, "did already existed");
-        hashToDID[inputHash] = resultDID;
-        dids[resultDID] = DID(true, meta,userType,0);
+
+    function createDID(string hash, uint256 timestamp, string nameSpace, string uuid) public onlyWhitelisted returns (string) {
+        bytes32 hashedNameSpace = keccak256(abi.encodePacked(nameSpace));
+        bytes32 hashedUuid = keccak256(abi.encodePacked(uuid));
+        string memory resultDID = string(abi.encodePacked(didPrefix, getHexString(hashedNameSpace), getHexString(hashedUuid)));
+        require(!dids[resultDID].exist, "did already exists");
+        dids[resultDID] = DID(true, nameSpace, uuid, hash, timestamp);
+        return resultDID;
     }
-    function getDID(string inputHash) public returns(string did)
-    {
-        string memory result = hashToDID[inputHash];
-        require(dids[result].exist, "did not exist");
-        did = result;
-    }
-    function addType(uint16 userType, address addr) public returns (bool success)
-    {
+
+    function addNameSpace(string nameSpace, address addr) public onlyWhitelisted {
         AbstractURI abURI = AbstractURI(addr);
-        generateMethods[userType] = abURI;
-        success = true;
+        nameSpaceToContract[nameSpace] = abURI;
     }
-    function deleteDID(string did) public returns(bool success)
-    {
-        require(dids[did].exist, "did do not exist");
+
+    function updateHashAndTime(string did, string hash, uint256 timestamp) public onlyWhitelisted {
+        require(dids[did].exist, "did does not exist");
+        dids[did].hash = hash;
+        dids[did].timestamp = timestamp;
+    }
+
+    function deleteDID(string did) public onlyWhitelisted {
+        require(dids[did].exist, "did does not exist");
         dids[did].exist = false;
     }
-    function getURI(string didString) public returns(string uri){
-        DID storage did = dids[didString];
-        require(did.exist, "");
-        uri = generateMethods[did.userType].generate(did.meta);
+
+    function getURI(string didString) public returns (string) {
+        DID memory did = dids[didString];
+        require(did.exist, "did does not exist");
+        return nameSpaceToContract[did.nameSpace].generate(did.uuid);
     }
+
     function getHexString(bytes32 value) public pure returns (string) {
         bytes memory result = new bytes(64); 
         string memory characterString = "0123456789abcdef";
@@ -55,8 +63,6 @@ contract DecentralizedIdentifier {
         }
         return string(result);
     }
-
-
 }
 
 
