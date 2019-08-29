@@ -1,15 +1,7 @@
 pragma solidity ^0.4.24;
 
 import './ownership/Whitelist.sol';
-
-contract L2Contract{
-     function createDID(string id, bytes32 hash, string uri) external returns (string);
-     function deleteDID(string did) external;
-     function updateHash(string did, bytes32 hash) external;
-     function updateURI(string did, string uri) external;
-     function getHash(string did) external returns (bytes32);
-     function getURI(string uuid) external returns (string);
-}
+import './SelfManagedDID.sol';
 
 contract DecentralizedIdentifier is Whitelist {
     string constant didPrefix = "did:io:";
@@ -59,57 +51,47 @@ contract DecentralizedIdentifier is Whitelist {
         dids[did].exist = false;
     }
 
-    function getL1Hash(string did) public view onlyWhitelisted returns (bytes32) {
+    function getL1Hash(string did) public view returns (bytes32) {
         require(dids[did].exist, "did does not exist");
         return dids[did].hash;
     }
 
-    function getL1URI(string did) public view onlyWhitelisted returns (string) {
+    function getL1URI(string did) public view returns (string) {
         require(dids[did].exist, "did does not exist");
         return dids[did].uri;
     }
 
-    function createDID(string nameSpace, string id, bytes32 hash, string uri) public returns (string) {
+    function createDID(string nameSpace, string id, bytes32 hash, string uri) public onlyWhitelisted returns (string) {
         if (bytes(nameSpace).length > 0) {
-            require(nameSpaceToL2Address[nameSpace] != address(0), "name space does not exist");
-            L2Contract l2 = L2Contract(nameSpaceToL2Address[nameSpace]);
-            return l2.createDID(id, hash, uri);
+            return getL2Contract(nameSpace).createDID(id, hash, uri);
         }
         return createL1DID(id, hash, uri);
     }
 
     function updateHash(string nameSpace, string did, bytes32 hash) public {
         if (bytes(nameSpace).length > 0) {
-            require(nameSpaceToL2Address[nameSpace] != address(0), "name space does not exist");
-            L2Contract l2 = L2Contract(nameSpaceToL2Address[nameSpace]);
-            return l2.updateHash(did, hash);
+            return getL2Contract(nameSpace).updateHash(did, hash);
         }
         return updateL1Hash(did, hash);
     }
 
     function deleteDID(string nameSpace, string did) public {
         if (bytes(nameSpace).length > 0) {
-            require(nameSpaceToL2Address[nameSpace] != address(0), "name space does not exist");
-            L2Contract l2 = L2Contract(nameSpaceToL2Address[nameSpace]);
-            return l2.deleteDID(did);
+            return getL2Contract(nameSpace).deleteDID(did);
         }
         return deleteL1DID(did);
     }
 
     function getHash(string nameSpace, string did) public returns (bytes32) {
         if (bytes(nameSpace).length > 0) {
-            require(nameSpaceToL2Address[nameSpace] != address(0), "name space does not exist");
-            L2Contract l2 = L2Contract(nameSpaceToL2Address[nameSpace]);
-            return l2.getHash(did);
+            return getL2Contract(nameSpace).getHash(did);
         }
         return getL1Hash(did);
     }
 
     function getURI(string nameSpace, string did) public returns (string) {
         if (bytes(nameSpace).length > 0) {
-            require(nameSpaceToL2Address[nameSpace] != address(0), "name space does not exist");
-            L2Contract l2 = L2Contract(nameSpaceToL2Address[nameSpace]);
-            return l2.getURI(did);
+            return getL2Contract(nameSpace).getURI(did);
         }
         return getL1URI(did);
     }
@@ -123,6 +105,11 @@ contract DecentralizedIdentifier is Whitelist {
             result[i * 2 + 1] = characters[uint256(value[i] & 0xF)];
         }
         return string(result);
+    }
+
+    function getL2Contract(string nameSpace) private view returns (SelfManagedDID) {
+        require(nameSpaceToL2Address[nameSpace] != address(0), "name space does not exist");
+        return SelfManagedDID(nameSpaceToL2Address[nameSpace]);
     }
 }
 

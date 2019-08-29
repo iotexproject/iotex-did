@@ -1,7 +1,7 @@
 pragma solidity ^0.4.24;
 
 
-interface L2Contract {
+interface SelfManagedDID {
     function createDID(string id, bytes32 hash, string uri) external returns (string);
     function deleteDID(string did) external;
     function updateHash(string did, bytes32 hash) external;
