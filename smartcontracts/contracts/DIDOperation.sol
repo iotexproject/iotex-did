@@ -1,50 +1,101 @@
 pragma solidity ^0.4.24;
 
-contract AbstractURI{
-    function generate(bytes meta) public returns(string);
-}
+import './ownership/Whitelist.sol';
+import './SelfManagedDID.sol';
 
-contract DecentralizedIdentifier {
+contract DecentralizedIdentifier is Whitelist {
+    string constant didPrefix = "did:io:";
     struct DID {
         bool exist;
-        bytes meta;
-        uint16 userType;
-        uint8 status;
+        bytes32 hash;
+        string uri;
     }
-    mapping(string => DID) dids; // 1,2,3 represent 3 status
-    mapping(string => string) hashToDID;
-    mapping(uint16 => AbstractURI) generateMethods;
+    mapping(string => DID) dids;
+    mapping(string => address) nameSpaceToL2Address;
+
     constructor() public {
+        addAddressToWhitelist(msg.sender);
     }
-    function createDID(string inputHash, uint16 userType, bytes meta) public payable returns(string resultDID) {
-        bytes32 didString = keccak256(abi.encodePacked(inputHash));
-        resultDID = string(abi.encodePacked("did:iotex:",getHexString(didString)));
-        require(!dids[resultDID].exist, "did already existed");
-        hashToDID[inputHash] = resultDID;
-        dids[resultDID] = DID(true, meta,userType,0);
+
+    function registerL2Contract(string nameSpace, address addr) public onlyWhitelisted {
+        require(addr != address(0), "invalid contract address");
+        nameSpaceToL2Address[nameSpace] = addr;
     }
-    function getDID(string inputHash) public returns(string did)
-    {
-        string memory result = hashToDID[inputHash];
-        require(dids[result].exist, "did not exist");
-        did = result;
+
+    function deregisterL2Contract(string nameSpace) public onlyWhitelisted {
+        require(nameSpaceToL2Address[nameSpace] != address(0), "name space is not registered");
+        nameSpaceToL2Address[nameSpace] = address(0);
     }
-    function addType(uint16 userType, address addr) public returns (bool success)
-    {
-        AbstractURI abURI = AbstractURI(addr);
-        generateMethods[userType] = abURI;
-        success = true;
+
+    function updateL2ContractAddress(string nameSpace, address addr) public onlyWhitelisted {
+        require(nameSpaceToL2Address[nameSpace] != address(0), "name space is not registered");
+        require(addr != address(0), "invalid contract address");
+        nameSpaceToL2Address[nameSpace] = addr;
     }
-    function deleteDID(string did) public returns(bool success)
-    {
-        require(dids[did].exist, "did do not exist");
+
+    function createL1DID(string id, bytes32 hash, string uri) public onlyWhitelisted returns (string) {
+        bytes32 hashedID = keccak256(abi.encodePacked(id));
+        string memory resultDID = string(abi.encodePacked(didPrefix, getHexString(hashedID)));
+        require(!dids[resultDID].exist, "did already exists");
+        dids[resultDID] = DID(true, hash, uri);
+        return resultDID;
+    }
+
+    function updateL1Hash(string did, bytes32 hash) public onlyWhitelisted {
+        require(dids[did].exist, "did does not exist");
+        dids[did].hash = hash;
+    }
+
+    function deleteL1DID(string did) public onlyWhitelisted {
+        require(dids[did].exist, "did does not exist");
         dids[did].exist = false;
     }
-    function getURI(string didString) public returns(string uri){
-        DID storage did = dids[didString];
-        require(did.exist, "");
-        uri = generateMethods[did.userType].generate(did.meta);
+
+    function getL1Hash(string did) public view returns (bytes32) {
+        require(dids[did].exist, "did does not exist");
+        return dids[did].hash;
     }
+
+    function getL1URI(string did) public view returns (string) {
+        require(dids[did].exist, "did does not exist");
+        return dids[did].uri;
+    }
+
+    function createDID(string nameSpace, string id, bytes32 hash, string uri) public onlyWhitelisted returns (string) {
+        if (bytes(nameSpace).length > 0) {
+            return getL2Contract(nameSpace).createDID(id, hash, uri);
+        }
+        return createL1DID(id, hash, uri);
+    }
+
+    function updateHash(string nameSpace, string did, bytes32 hash) public {
+        if (bytes(nameSpace).length > 0) {
+            return getL2Contract(nameSpace).updateHash(did, hash);
+        }
+        return updateL1Hash(did, hash);
+    }
+
+    function deleteDID(string nameSpace, string did) public {
+        if (bytes(nameSpace).length > 0) {
+            return getL2Contract(nameSpace).deleteDID(did);
+        }
+        return deleteL1DID(did);
+    }
+
+    function getHash(string nameSpace, string did) public returns (bytes32) {
+        if (bytes(nameSpace).length > 0) {
+            return getL2Contract(nameSpace).getHash(did);
+        }
+        return getL1Hash(did);
+    }
+
+    function getURI(string nameSpace, string did) public returns (string) {
+        if (bytes(nameSpace).length > 0) {
+            return getL2Contract(nameSpace).getURI(did);
+        }
+        return getL1URI(did);
+    }
+
     function getHexString(bytes32 value) public pure returns (string) {
         bytes memory result = new bytes(64); 
         string memory characterString = "0123456789abcdef";
@@ -56,7 +107,10 @@ contract DecentralizedIdentifier {
         return string(result);
     }
 
-
+    function getL2Contract(string nameSpace) private view returns (SelfManagedDID) {
+        require(nameSpaceToL2Address[nameSpace] != address(0), "name space does not exist");
+        return SelfManagedDID(nameSpaceToL2Address[nameSpace]);
+    }
 }
 
 

@@ -1,12 +1,13 @@
 pragma solidity ^0.4.24;
 
 
-contract URIGenerator{
-
-    function generate(bytes meta) public returns(string uri){
-        uri = "root:Hanyuqing99@tcp(127.0.0.1:3306)/testDID";
-    }
-
+interface SelfManagedDID {
+    function createDID(string id, bytes32 hash, string uri) external returns (string);
+    function deleteDID(string did) external;
+    function updateHash(string did, bytes32 hash) external;
+    function updateURI(string did, string uri) external;
+    function getHash(string did) external returns (bytes32);
+    function getURI(string uuid) external returns (string);
 }
 /*
 {
