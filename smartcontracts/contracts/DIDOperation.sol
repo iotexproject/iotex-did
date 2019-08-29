@@ -1,19 +1,13 @@
 pragma solidity ^0.4.24;
 
 import './ownership/Whitelist.sol';
-import './IoTeXDID.sol';
 import './SelfManagedDID.sol';
 
 contract DecentralizedIdentifier is Whitelist {
-    IoTeXDID public iotexDID;
     mapping(string => address) nameSpaceToSelfManagedAddress;
 
-    constructor(address _iotexDIDAddress) public {
-        iotexDID = IoTeXDID(_iotexDIDAddress);
-    }
-
-    function updateIoTeXDIDContractAddress(address _iotexDIDAddress) public onlyWhitelisted {
-        iotexDID = IoTeXDID(_iotexDIDAddress);
+    constructor() public {
+        addAddressToWhitelist(msg.sender);
     }
 
     function registerSelfManagedContract(string nameSpace, address addr) public onlyWhitelisted {
@@ -33,45 +27,27 @@ contract DecentralizedIdentifier is Whitelist {
     }
 
     function createDID(string nameSpace, string id, bytes32 hash, string uri) public returns (string) {
-        if (bytes(nameSpace).length > 0) {
-            return getSelfManagedContract(nameSpace).createDID(id, hash, uri);
-        }
-        return iotexDID.createDID(hash, uri);
+        return getSelfManagedContract(nameSpace).createDID(id, hash, uri);
     }
 
     function updateHash(string nameSpace, string did, bytes32 hash) public {
-        if (bytes(nameSpace).length > 0) {
-            return getSelfManagedContract(nameSpace).updateHash(did, hash);
-        }
-        return iotexDID.updateHash(hash);
+        return getSelfManagedContract(nameSpace).updateHash(did, hash);
     }
 
     function updateURI(string nameSpace, string did, string uri) public {
-        if (bytes(nameSpace).length > 0) {
-            return getSelfManagedContract(nameSpace).updateURI(did, uri);
-        }
-        return iotexDID.updateURI(uri);
+        return getSelfManagedContract(nameSpace).updateURI(did, uri);
     }
 
     function deleteDID(string nameSpace, string did) public {
-        if (bytes(nameSpace).length > 0) {
-            return getSelfManagedContract(nameSpace).deleteDID(did);
-        }
-        return iotexDID.deleteDID();
+        return getSelfManagedContract(nameSpace).deleteDID(did);
     }
 
-    function getHash(string nameSpace, string did) public returns (bytes32) {
-        if (bytes(nameSpace).length > 0) {
-            return getSelfManagedContract(nameSpace).getHash(did);
-        }
-        return iotexDID.getHash(did);
+    function getHash(string nameSpace, string did) public view returns (bytes32) {
+        return getSelfManagedContract(nameSpace).getHash(did);
     }
 
-    function getURI(string nameSpace, string did) public returns (string) {
-        if (bytes(nameSpace).length > 0) {
-            return getSelfManagedContract(nameSpace).getURI(did);
-        }
-        return iotexDID.getURI(did);
+    function getURI(string nameSpace, string did) public view returns (string) {
+        return getSelfManagedContract(nameSpace).getURI(did);
     }
 
     function getSelfManagedContract(string nameSpace) private view returns (SelfManagedDID) {
