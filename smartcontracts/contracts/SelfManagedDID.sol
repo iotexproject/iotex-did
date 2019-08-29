@@ -7,7 +7,7 @@ interface SelfManagedDID {
     function updateHash(string did, bytes32 hash) external;
     function updateURI(string did, string uri) external;
     function getHash(string did) external returns (bytes32);
-    function getURI(string uuid) external returns (string);
+    function getURI(string did) external returns (string);
 }
 /*
 {
