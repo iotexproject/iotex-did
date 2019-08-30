@@ -4,53 +4,37 @@ import './ownership/Whitelist.sol';
 import './SelfManagedDID.sol';
 
 contract DecentralizedIdentifier is Whitelist {
-    mapping(string => address) nameSpaceToSelfManagedAddress;
+    mapping(bytes32 => address) public nameSpaceToSelfManagedAddress;
 
     constructor() public {
         addAddressToWhitelist(msg.sender);
     }
 
-    function registerSelfManagedContract(string nameSpace, address addr) public onlyWhitelisted {
+    function registerSelfManagedContract(bytes32 nameSpace, address addr) public onlyWhitelisted {
         require(addr != address(0), "invalid contract address");
         nameSpaceToSelfManagedAddress[nameSpace] = addr;
     }
 
-    function deregisterSelfManagedContract(string nameSpace) public onlyWhitelisted {
+    function deregisterSelfManagedContract(bytes32 nameSpace) public onlyWhitelisted {
         require(nameSpaceToSelfManagedAddress[nameSpace] != address(0), "name space is not registered");
         nameSpaceToSelfManagedAddress[nameSpace] = address(0);
     }
 
-    function updateSelfManagedContractAddress(string nameSpace, address addr) public onlyWhitelisted {
+    function updateSelfManagedContractAddress(bytes32 nameSpace, address addr) public onlyWhitelisted {
         require(nameSpaceToSelfManagedAddress[nameSpace] != address(0), "name space is not registered");
         require(addr != address(0), "invalid contract address");
         nameSpaceToSelfManagedAddress[nameSpace] = addr;
     }
 
-    function createDID(string nameSpace, string id, bytes32 hash, string uri) public returns (string) {
-        return getSelfManagedContract(nameSpace).createDID(id, hash, uri);
-    }
-
-    function updateHash(string nameSpace, string did, bytes32 hash) public {
-        return getSelfManagedContract(nameSpace).updateHash(did, hash);
-    }
-
-    function updateURI(string nameSpace, string did, string uri) public {
-        return getSelfManagedContract(nameSpace).updateURI(did, uri);
-    }
-
-    function deleteDID(string nameSpace, string did) public {
-        return getSelfManagedContract(nameSpace).deleteDID(did);
-    }
-
-    function getHash(string nameSpace, string did) public view returns (bytes32) {
+    function getHash(bytes32 nameSpace, string did) public view returns (bytes32) {
         return getSelfManagedContract(nameSpace).getHash(did);
     }
 
-    function getURI(string nameSpace, string did) public view returns (string) {
+    function getURI(bytes32 nameSpace, string did) public view returns (string) {
         return getSelfManagedContract(nameSpace).getURI(did);
     }
 
-    function getSelfManagedContract(string nameSpace) private view returns (SelfManagedDID) {
+    function getSelfManagedContract(bytes32 nameSpace) private view returns (SelfManagedDID) {
         require(nameSpaceToSelfManagedAddress[nameSpace] != address(0), "name space does not exist");
         return SelfManagedDID(nameSpaceToSelfManagedAddress[nameSpace]);
     }
