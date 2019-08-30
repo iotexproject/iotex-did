@@ -3,8 +3,12 @@ pragma solidity ^0.4.24;
 import './SelfManagedDID.sol';
 
 contract IoTeXDID is SelfManagedDID {
-    modifier onlyDIDOwner() {
-        require(dids[generateDIDString()].exist, "not a did owner");
+    modifier onlyDIDOwner(string didInput) {
+        string memory didString = generateDIDString();
+        if (bytes(didInput).length > 0) {
+            require(compareStrings(didInput, didString), "caller does not own the given did");
+        }
+        require(dids[didString].exist, "caller is not a did owner");
         _;
     }
 
@@ -17,21 +21,24 @@ contract IoTeXDID is SelfManagedDID {
     mapping(string => DID) dids;
 
     function createDID(string id, bytes32 hash, string uri) public returns (string) {
+        if (bytes(id).length > 0) {
+            require(compareStrings(id, addrToString(msg.sender)), "id does not match creator");
+        }
         string memory resultDID = generateDIDString();
         require(!dids[resultDID].exist, "did already exists");
         dids[resultDID] = DID(true, hash, uri);
         return resultDID;
     }
 
-    function updateHash(string did, bytes32 hash) public onlyDIDOwner {
+    function updateHash(string did, bytes32 hash) public onlyDIDOwner(did) {
         dids[generateDIDString()].hash = hash;
     }
 
-    function updateURI(string did, string uri) public onlyDIDOwner {
+    function updateURI(string did, string uri) public onlyDIDOwner(did) {
         dids[generateDIDString()].uri = uri;
     }
 
-    function deleteDID(string did) public onlyDIDOwner {
+    function deleteDID(string did) public onlyDIDOwner(did) {
         dids[generateDIDString()].exist = false;
     }
 
@@ -45,20 +52,8 @@ contract IoTeXDID is SelfManagedDID {
         return dids[did].uri;
     }
 
-    function getHexString(bytes32 value) public pure returns (string) {
-        bytes memory result = new bytes(64);
-        string memory characterString = "0123456789abcdef";
-        bytes memory characters = bytes(characterString);
-        for (uint8 i = 0; i < 32; i++) {
-            result[i * 2] = characters[uint256((value[i] & 0xF0) >> 4)];
-            result[i * 2 + 1] = characters[uint256(value[i] & 0xF)];
-        }
-        return string(result);
-    }
-
     function generateDIDString() private view returns (string) {
-        bytes32 hashedID = keccak256(abi.encodePacked(addrToString(msg.sender)));
-        return string(abi.encodePacked(didPrefix, getHexString(hashedID)));
+        return string(abi.encodePacked(didPrefix, addrToString(msg.sender)));
     }
 
     function addrToString(address _addr) internal pure returns(string) {
@@ -74,5 +69,9 @@ contract IoTeXDID is SelfManagedDID {
             str[4+i*2] = alphabet[uint(value[i + 12] & 0x0f)];
         }
         return string(str);
+    }
+
+    function compareStrings (string a, string b) internal pure returns (bool) {
+        return (keccak256(abi.encodePacked((a))) == keccak256(abi.encodePacked((b))));
     }
 }
