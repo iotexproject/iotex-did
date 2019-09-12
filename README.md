@@ -20,7 +20,7 @@ The following part of this document specifies the IoTeX implementation of the Se
 
 We use the `iotex` to be our method name and a formal DID using this method need begin with following prefix: `did:io` . Furthermore, all the characters in the prefix need be in lowercase. The string after prefix is the unique IoTeX account address of the registered user/device.
 
-## Generating a unique idstring
+## Generate a unique ID string
 
 Every user or device needs to register its own DID by uploading its UUID under a namespace, DID document hash, and DID document URI. Then a unique `idstring` is created as follows:
 
@@ -45,7 +45,7 @@ An example IoTeX DID:
 did:io:0x5576E95935366Ebd2637D9171E4C92e60598be10
 ```
 
-## Deactive a DID
+## Deactivate a DID
 
 A registered DID can be deactivated anytime as long as the caller's address matches the address within the DID string. Once a DID is deactivated, the metadata of the corresponding document cannot be updated. 
 
