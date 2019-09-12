@@ -1,7 +1,7 @@
 # IoTeX DID Method Specification
 ### Second Draft 10 Sep 2019
 
-A DID is an idenetfier which enables users to protect and control their identities on IoTeX blockchain. In IoTeX DID system, we allow each manufacture or namespace store and manage DIDs through its self-managed DID smart contract. Every self-managed smart contract has to implement the SelfManagedDID interface defined as follows:
+A DID is an identifier which enables users to protect and control their identities on IoTeX blockchain. In IoTeX DID system, we allow each manufacture or namespace to store and manage DIDs through its self-managed DID smart contract. Every self-managed smart contract has to implement the SelfManagedDID interface defined as follows:
 
 ```
 interface SelfManagedDID {
@@ -18,7 +18,7 @@ The following part of this document specifies the IoTeX implementation of the Se
 
 ## Method Name
 
-We use the `iotex` to be our method name and a formal DID using this method need begin with following prefix: `did:io` . Furthermore, all the characters in the prefix need be in lowercase. The string after prefix is the unique IoTeX account address of the registered user/device.
+We use the `iotex` to be our method name and a formal DID using this method need begin with following prefix: `did:io` . Furthermore, all the characters in the prefix need to be in lowercase. The string after prefix is the unique IoTeX account address of the registered user/device.
 
 ## Generate a unique ID string
 
