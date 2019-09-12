@@ -158,24 +158,24 @@ Here is a draft IoTeX DID document example:
 ```
 {
     "@context": "https://w3id.org/did/v1", 
-    "id": "did:io:123456789abcdefghij", 
+    "id": "did:io:0x88C36867cffB66197812a9385A038cc6Dd75244b", 
     "publicKey": [{
-        "id": "did:io:123456789abcdefghij#keys-1", 
+        "id": "did:io:0x5576E95935366Ebd2637D9171E4C92e60598be10", 
         "type": "RsaVerificationKey2018", 
-        "controller": "did:io:123456789abcdefghij", 
+        "controller": "did:io:0x56d0B5eD3D525332F00C9BC938f93598ab16AAA7", 
         "publicKeyPem": "-----BEGIN PUBLIC KEY...END PUBLIC KEY-----\r\n" }], 
     "authentication": [{ 
         "type": "RsaSignatureAuthentication2018", 
-        "publicKey": "did:io:123456789abcdefghi#keys-1" }], 
+        "publicKey": "did:io:0xFB33bDd63f16A617dc5807C367D826339DA54454" }], 
     "service": [{ 
-        "id": "did:io:123456789abcdefghij;exam_svc", 
+        "id": "did:io:0x97186A21fA8E7955C0f154f960d588C3ACA44f14", 
         "type": "ExampleService", 
         "serviceEndpoint": "https://example.com/endpoint/8377464" }], 
     "created": "2018-02-08T16:03:00Z", 
     "proof": { 
         "type": "LinkedDataSignature2015", 
         "created": "2018-02-08T16:02:20Z", 
-        "creator": "did:io:8uQhQMGzWxR8vw5P3UWH1ja#keys-1", 
+        "creator": "did:io:0x9073D661b54cFf55f8f6363E1a92d2940763e24a", 
         "signatureValue": "QNB13Y7Q9...1tzjn4w==" 
     }
 }    
