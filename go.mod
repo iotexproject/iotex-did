@@ -3,20 +3,15 @@ module github.com/iotexproject/iotex-DID
 go 1.12
 
 require (
-	github.com/766b/go-outliner v0.0.0-20180511142203-fc6edecdadd7 // indirect
 	github.com/allegro/bigcache v1.2.1 // indirect
-	github.com/elastic/gosigar v0.10.4 // indirect
 	github.com/ethereum/go-ethereum v1.8.27
-	github.com/go-sql-driver/mysql v1.4.1
+	github.com/iotexproject/go-pkgs v0.1.1-0.20190513193226-f065b9342b78
 	github.com/iotexproject/iotex-address v0.2.0
 	github.com/iotexproject/iotex-antenna-go/v2 v2.3.0
-	github.com/iotexproject/iotex-proto v0.2.0
-	github.com/mr-tron/base58 v1.1.2
-	github.com/multiformats/go-multihash v0.0.6
-	github.com/ockam-network/did v0.1.3 // indirect
-	github.com/steakknife/bloomfilter v0.0.0-20180922174646-6819c0d2a570 // indirect
-	github.com/steakknife/hamming v0.0.0-20180906055917-c99c65617cd3 // indirect
-	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4
+	github.com/iotexproject/iotex-proto v0.1.1-0.20190512055829-507894271007
+	github.com/pkg/errors v0.8.1
+	github.com/spf13/cobra v0.0.5
+	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4 // indirect
 	google.golang.org/appengine v1.4.0 // indirect
-	google.golang.org/genproto v0.0.0-20190502173448-54afdca5d873
+	google.golang.org/grpc v1.20.1
 )
