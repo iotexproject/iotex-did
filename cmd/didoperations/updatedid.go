@@ -3,6 +3,8 @@ package didoperations
 import (
 	"context"
 	"encoding/hex"
+	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -12,8 +14,6 @@ import (
 	"github.com/iotexproject/iotex-proto/golang/iotexapi"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-
-	"github.com/iotexproject/iotex-DID/util"
 )
 
 var UpdateDIDCmd = &cobra.Command{
@@ -33,7 +33,7 @@ func updateDID() error {
 	}
 	defer conn.Close()
 
-	c, err := getAuthedClient(conn)
+	c, err := getAuthedClient(conn, _password)
 	if err != nil {
 		return errors.Wrap(err, "failed to get authed client")
 	}
@@ -54,40 +54,54 @@ func updateDID() error {
 		return errors.Wrap(err, "failed to convert iotex address to eth common address")
 	}
 	didString := DIDPrefix + ioCommonAddr.String()
-	docHash := util.MustFetchNonEmptyParam("DOCUMENT_HASH")
-	h1, err := c.Contract(caddr, iotexDIDABI).Execute("updateHash", didString, stringToBytes32(docHash)).
-		SetGasPrice(GasPrice).SetGasLimit(GasLimit).Call(ctx)
-	if err != nil {
-		return errors.Wrap(err, "failed to execute updateHash function")
+	if _newHash != "" {
+		h1, err := c.Contract(caddr, iotexDIDABI).Execute("updateHash", didString, stringToBytes32(_newHash)).
+			SetGasPrice(GasPrice).SetGasLimit(GasLimit).Call(ctx)
+		if err != nil {
+			return errors.Wrap(err, "failed to execute updateHash function")
+		}
+		time.Sleep(30 * time.Second)
+		resp, err := c.API().GetReceiptByAction(ctx, &iotexapi.GetReceiptByActionRequest{
+			ActionHash: hex.EncodeToString(h1[:]),
+		})
+		if err != nil {
+			return err
+		}
+		if resp.ReceiptInfo.Receipt.Status != 1 {
+			return errors.Errorf("updating hash failed: %x", h1)
+		}
+		fmt.Println("Updated Hash for DID:", DIDPrefix+strings.ToLower(ioCommonAddr.String()))
 	}
 
-	docURI := util.MustFetchNonEmptyParam("DOCUMENT_URI")
-	h2, err := c.Contract(caddr, iotexDIDABI).Execute("updateURI", didString, docURI).
-		SetGasPrice(GasPrice).SetGasLimit(GasLimit).Call(ctx)
-	if err != nil {
-		return errors.Wrap(err, "failed to execute updateURI function")
-	}
-
-	time.Sleep(30 * time.Second)
-
-	resp, err := c.API().GetReceiptByAction(ctx, &iotexapi.GetReceiptByActionRequest{
-		ActionHash: hex.EncodeToString(h1[:]),
-	})
-	if err != nil {
-		return err
-	}
-	if resp.ReceiptInfo.Receipt.Status != 1 {
-		return errors.Errorf("updating hash failed: %x", h1)
-	}
-
-	resp, err = c.API().GetReceiptByAction(ctx, &iotexapi.GetReceiptByActionRequest{
-		ActionHash: hex.EncodeToString(h2[:]),
-	})
-	if err != nil {
-		return err
-	}
-	if resp.ReceiptInfo.Receipt.Status != 1 {
-		return errors.Errorf("updating uri failed: %x", h2)
+	if _newURI != "" {
+		h2, err := c.Contract(caddr, iotexDIDABI).Execute("updateURI", didString, _newURI).
+			SetGasPrice(GasPrice).SetGasLimit(GasLimit).Call(ctx)
+		if err != nil {
+			return errors.Wrap(err, "failed to execute updateURI function")
+		}
+		time.Sleep(30 * time.Second)
+		resp, err := c.API().GetReceiptByAction(ctx, &iotexapi.GetReceiptByActionRequest{
+			ActionHash: hex.EncodeToString(h2[:]),
+		})
+		if err != nil {
+			return err
+		}
+		if resp.ReceiptInfo.Receipt.Status != 1 {
+			return errors.Errorf("updating uri failed: %x", h2)
+		}
+		fmt.Println("Updated URI for DID:", DIDPrefix+strings.ToLower(ioCommonAddr.String()))
 	}
 	return nil
+}
+
+var _newHash string
+var _newURI string
+
+func init() {
+	UpdateDIDCmd.Flags().StringVarP(&_password, "password", "p", "", "password for keystore file")
+	if err := UpdateDIDCmd.MarkFlagRequired("password"); err != nil {
+		log.Fatal(err.Error())
+	}
+	UpdateDIDCmd.Flags().StringVar(&_newHash, "hash", "", "updated document hash")
+	UpdateDIDCmd.Flags().StringVarP(&_newURI, "uri", "u", "", "updated document uri")
 }

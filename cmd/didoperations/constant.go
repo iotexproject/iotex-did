@@ -7,7 +7,6 @@ import (
 	"github.com/iotexproject/iotex-DID/util"
 	"github.com/iotexproject/iotex-antenna-go/v2/iotex"
 	"github.com/iotexproject/iotex-proto/golang/iotexapi"
-	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -529,26 +528,20 @@ const (
 	ContractAddress         = "io18hknrr046trhwr4whuc8dp4jlrvml3sz9a70mm"
 	OperatorContractAddress = "io1zymkzns6qd3z7lky3aqpgdj4smdg2fqwxfltrs"
 	DIDPrefix               = "did:io:"
-	Namespace               = "iotex"
 	IOEndpoint              = "api.testnet.iotex.one:443"
 )
 
 var (
-	GasPrice = big.NewInt(1e12)
-	GasLimit = uint64(3000000)
+	GasPrice  = big.NewInt(1e12)
+	GasLimit  = uint64(3000000)
+	_password string
 )
 
 // getAuthedClient gets authed client using given account's credentials
-func getAuthedClient(conn *grpc.ClientConn) (iotex.AuthedClient, error) {
-	pwd := util.MustFetchNonEmptyParam("VAULT_PASSWORD")
+func getAuthedClient(conn *grpc.ClientConn, pwd string) (iotex.AuthedClient, error) {
 	account, err := util.GetVaultAccount(pwd)
 	if err != nil {
 		log.Fatal("failed to get account", err)
-	}
-	// verify the account matches the reward address
-	iodeviceAddress := util.MustFetchNonEmptyParam("VAULT_ADDRESS")
-	if account.Address().String() != iodeviceAddress {
-		return nil, errors.Wrap(err, "failed to verify account")
 	}
 	return iotex.NewAuthedClient(iotexapi.NewAPIServiceClient(conn), account), nil
 }

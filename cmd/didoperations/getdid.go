@@ -3,6 +3,7 @@ package didoperations
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -29,7 +30,7 @@ func getHash() error {
 	}
 	defer conn.Close()
 
-	c, err := getAuthedClient(conn)
+	c, err := getAuthedClient(conn, _password)
 	if err != nil {
 		return errors.Wrap(err, "failed to get authed client")
 	}
@@ -45,12 +46,7 @@ func getHash() error {
 		return errors.Wrap(err, "failed to parse DID ABI")
 	}
 
-	ioCommonAddr, err := ioAddrToEvmAddr(c.Account().Address().String())
-	if err != nil {
-		return errors.Wrap(err, "failed to convert iotex address to eth common address")
-	}
-	didString := DIDPrefix + ioCommonAddr.String()
-	data, err := c.Contract(caddr, didABI).Read("getHash", stringToBytes32(Namespace), didString).Call(ctx)
+	data, err := c.Contract(caddr, didABI).Read("getHash", stringToBytes32(_namespace), _didString).Call(ctx)
 	if err != nil {
 		return errors.Wrap(err, "failed to get DID document hash")
 	}
@@ -59,7 +55,7 @@ func getHash() error {
 		return errors.Wrap(err, "failed to unmarshal hash")
 	}
 
-	data, err = c.Contract(caddr, didABI).Read("getURI", stringToBytes32(Namespace), didString).Call(ctx)
+	data, err = c.Contract(caddr, didABI).Read("getURI", stringToBytes32(_namespace), _didString).Call(ctx)
 	if err != nil {
 		return errors.Wrap(err, "failed to get DID document URI")
 	}
@@ -71,4 +67,22 @@ func getHash() error {
 	fmt.Println("Document Hash:", string(hash[:]))
 	fmt.Println("Document URI:", uri)
 	return nil
+}
+
+var _namespace string
+var _didString string
+
+func init() {
+	GetDIDCmd.Flags().StringVarP(&_password, "password", "p", "", "password for keystore file")
+	if err := GetDIDCmd.MarkFlagRequired("password"); err != nil {
+		log.Fatal(err.Error())
+	}
+	GetDIDCmd.Flags().StringVarP(&_namespace, "namespace", "n", "", "DID namespace")
+	if err := GetDIDCmd.MarkFlagRequired("namespace"); err != nil {
+		log.Fatal(err.Error())
+	}
+	GetDIDCmd.Flags().StringVarP(&_didString, "did-string", "d", "", "DID string")
+	if err := GetDIDCmd.MarkFlagRequired("did-string"); err != nil {
+		log.Fatal(err.Error())
+	}
 }

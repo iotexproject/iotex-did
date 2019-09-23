@@ -3,6 +3,8 @@ package didoperations
 import (
 	"context"
 	"encoding/hex"
+	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -31,7 +33,7 @@ func deleteDID() error {
 	}
 	defer conn.Close()
 
-	c, err := getAuthedClient(conn)
+	c, err := getAuthedClient(conn, _password)
 	if err != nil {
 		return errors.Wrap(err, "failed to get authed client")
 	}
@@ -69,5 +71,13 @@ func deleteDID() error {
 	if resp.ReceiptInfo.Receipt.Status != 1 {
 		return errors.Errorf("deleting IoTeX DID failed: %x", h)
 	}
+	fmt.Println("Deleted DID:", DIDPrefix+strings.ToLower(ioCommonAddr.String()))
 	return nil
+}
+
+func init() {
+	DeleteDIDCmd.Flags().StringVarP(&_password, "password", "p", "", "password for keystore file")
+	if err := DeleteDIDCmd.MarkFlagRequired("password"); err != nil {
+		log.Fatal(err.Error())
+	}
 }

@@ -3,6 +3,8 @@ package didoperations
 import (
 	"context"
 	"encoding/hex"
+	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -12,8 +14,6 @@ import (
 	"github.com/iotexproject/iotex-proto/golang/iotexapi"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-
-	"github.com/iotexproject/iotex-DID/util"
 )
 
 var CreateDIDCmd = &cobra.Command{
@@ -33,7 +33,7 @@ func createDID() error {
 	}
 	defer conn.Close()
 
-	c, err := getAuthedClient(conn)
+	c, err := getAuthedClient(conn, _password)
 	if err != nil {
 		return errors.Wrap(err, "failed to get authed client")
 	}
@@ -53,9 +53,7 @@ func createDID() error {
 	if err != nil {
 		return errors.Wrap(err, "failed to convert iotex address to eth common address")
 	}
-	docHash := util.MustFetchNonEmptyParam("DOCUMENT_HASH")
-	docURI := util.MustFetchNonEmptyParam("DOCUMENT_URI")
-	h, err := c.Contract(caddr, iotexDIDABI).Execute("createDID", ioCommonAddr.String(), stringToBytes32(docHash), docURI).
+	h, err := c.Contract(caddr, iotexDIDABI).Execute("createDID", ioCommonAddr.String(), stringToBytes32(_hash), _uri).
 		SetGasPrice(GasPrice).SetGasLimit(GasLimit).Call(ctx)
 	if err != nil {
 		return errors.Wrap(err, "failed to execute createDID function")
@@ -72,5 +70,25 @@ func createDID() error {
 	if resp.ReceiptInfo.Receipt.Status != 1 {
 		return errors.Errorf("creating IoTeX DID failed: %x", h)
 	}
+
+	fmt.Println("Created DID:", DIDPrefix+strings.ToLower(ioCommonAddr.String()))
 	return nil
+}
+
+var _hash string
+var _uri string
+
+func init() {
+	CreateDIDCmd.Flags().StringVarP(&_password, "password", "p", "", "password for keystore file")
+	if err := CreateDIDCmd.MarkFlagRequired("password"); err != nil {
+		log.Fatal(err.Error())
+	}
+	CreateDIDCmd.Flags().StringVar(&_hash, "hash", "", "document hash")
+	if err := CreateDIDCmd.MarkFlagRequired("hash"); err != nil {
+		log.Fatal(err.Error())
+	}
+	CreateDIDCmd.Flags().StringVarP(&_uri, "uri", "u", "", "document uri")
+	if err := CreateDIDCmd.MarkFlagRequired("uri"); err != nil {
+		log.Fatal(err.Error())
+	}
 }
