@@ -161,11 +161,11 @@ Here is a draft IoTeX DID document example:
     "id": "did:io:0x88C36867cffB66197812a9385A038cc6Dd75244b", 
     "publicKey": [{
         "id": "did:io:0x5576E95935366Ebd2637D9171E4C92e60598be10#keys-1", 
-        "type": "RsaVerificationKey2048", 
+        "type": "RsaVerificationKey2018", 
         "controller": "did:io:0x56d0B5eD3D525332F00C9BC938f93598ab16AAA7", 
         "publicKeyPem": "-----BEGIN PUBLIC KEY...END PUBLIC KEY-----\r\n" }], 
     "authentication": [{ 
-        "type": "RsaSignatureAuthentication2048", 
+        "type": "RsaSignatureAuthentication2018", 
         "publicKey": "did:io:0x5576E95935366Ebd2637D9171E4C92e60598be10#keys-1" }], 
     "service": [{ 
         "id": "did:io:0x88C36867cffB66197812a9385A038cc6Dd75244b;exam_svc", 
@@ -206,7 +206,7 @@ Here is a draft IoTeX verifiable credentials example:
         "address": "..."
     },
     "proof": { 
-        "type": "RsaSignature2048", 
+        "type": "RsaSignature2018", 
         "created": "2017-06-18T21:19:10Z", 
         "creator": "did:io:0xb36A1D1778f9D5E5816682c2cC0d16C65828a6b4#key-1", 
         "nonce": "c0ae1c8e-c7e7-469f-b252-86e6a0e7387e", 
