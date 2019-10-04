@@ -191,7 +191,8 @@ const (
     }
   ]`
 
-	DecentralizedIdentifierABI = `[
+	// DeviceDecentralizedIdentifierABI defines the ABI of Device DID
+	DeviceDecentralizedIdentifierABI = `[
     {
       "constant": false,
       "inputs": [
@@ -525,9 +526,411 @@ const (
     }
   ]`
 
-	ContractAddress         = "io18hknrr046trhwr4whuc8dp4jlrvml3sz9a70mm"
-	OperatorContractAddress = "io1zymkzns6qd3z7lky3aqpgdj4smdg2fqwxfltrs"
-	DIDPrefix               = "did:io:"
+	MockDeviceDIDABI = `[
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "addrs",
+          "type": "address[]"
+        }
+      ],
+      "name": "removeAddressesFromWhitelist",
+      "outputs": [
+        {
+          "name": "success",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "addr",
+          "type": "address"
+        }
+      ],
+      "name": "removeAddressFromWhitelist",
+      "outputs": [
+        {
+          "name": "success",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "cloudServiceAddr",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "addr",
+          "type": "address"
+        }
+      ],
+      "name": "addAddressToWhitelist",
+      "outputs": [
+        {
+          "name": "success",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "whitelist",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "addrs",
+          "type": "address[]"
+        }
+      ],
+      "name": "addAddressesToWhitelist",
+      "outputs": [
+        {
+          "name": "success",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "name": "_cloudServiceAddr",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "uuid",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "name": "didString",
+          "type": "string"
+        }
+      ],
+      "name": "CreateDID",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "didString",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "name": "hash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "UpdateHash",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "didString",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "name": "uri",
+          "type": "string"
+        }
+      ],
+      "name": "UpdateURI",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "didString",
+          "type": "string"
+        }
+      ],
+      "name": "DeleteDID",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "addr",
+          "type": "address"
+        }
+      ],
+      "name": "WhitelistedAddressAdded",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "addr",
+          "type": "address"
+        }
+      ],
+      "name": "WhitelistedAddressRemoved",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "uuid",
+          "type": "string"
+        },
+        {
+          "name": "proof",
+          "type": "bytes"
+        },
+        {
+          "name": "hash",
+          "type": "bytes32"
+        },
+        {
+          "name": "uri",
+          "type": "string"
+        }
+      ],
+      "name": "createDID",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "uuid",
+          "type": "string"
+        },
+        {
+          "name": "proof",
+          "type": "bytes"
+        },
+        {
+          "name": "hash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "updateHash",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "uuid",
+          "type": "string"
+        },
+        {
+          "name": "proof",
+          "type": "bytes"
+        },
+        {
+          "name": "uri",
+          "type": "string"
+        }
+      ],
+      "name": "updateURI",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "uuid",
+          "type": "string"
+        },
+        {
+          "name": "proof",
+          "type": "bytes"
+        }
+      ],
+      "name": "deleteDID",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "_cloudServiceAddr",
+          "type": "address"
+        }
+      ],
+      "name": "setCloudServiceAddr",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "did",
+          "type": "string"
+        }
+      ],
+      "name": "getHash",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "did",
+          "type": "string"
+        }
+      ],
+      "name": "getURI",
+      "outputs": [
+        {
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ]`
+
+	ControllerContractAddress         = "io18hknrr046trhwr4whuc8dp4jlrvml3sz9a70mm"
+	DeviceOperatorContractAddress = "io1h5ev9vwcfrwyv3v8k7tuj6enn6czaqu3uug6ke"
+	MockDeviceContractAddress = "io1all8tkuncgsnjmhzhlgghf4nuf0mayuczzsql9"
+	ControllerDIDPrefix               = "did:io:"
+	MockDeviceDIDPrefix = "did:io:mock:"
 	IOEndpoint              = "api.testnet.iotex.one:443"
 )
 
@@ -535,6 +938,8 @@ var (
 	GasPrice  = big.NewInt(1e12)
 	GasLimit  = uint64(3000000)
 	_password string
+	_uuid string
+	_signature string
 )
 
 // getAuthedClient gets authed client using given account's credentials

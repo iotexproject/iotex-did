@@ -14,8 +14,12 @@ var RootCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.AddCommand(didoperations.CreateDIDCmd)
-	RootCmd.AddCommand(didoperations.GetDIDCmd)
-	RootCmd.AddCommand(didoperations.UpdateDIDCmd)
-	RootCmd.AddCommand(didoperations.DeleteDIDCmd)
+	RootCmd.AddCommand(didoperations.CreateControllerDIDCmd)
+	RootCmd.AddCommand(didoperations.GetControllerDIDCmd)
+	RootCmd.AddCommand(didoperations.UpdateControllerDIDCmd)
+	RootCmd.AddCommand(didoperations.DeleteControllerDIDCmd)
+	RootCmd.AddCommand(didoperations.CreateDeviceDIDCmd)
+	RootCmd.AddCommand(didoperations.GetDeviceDIDCmd)
+	RootCmd.AddCommand(didoperations.UpdateDeviceDIDCmd)
+	RootCmd.AddCommand(didoperations.DeleteDeviceDIDCmd)
 }

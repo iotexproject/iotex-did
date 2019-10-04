@@ -1,9 +1,9 @@
 pragma solidity ^0.4.24;
 
 import './ownership/Whitelist.sol';
-import './SelfManagedDID.sol';
+import './SelfManagedDeviceDID.sol';
 
-contract DecentralizedIdentifier is Whitelist {
+contract DeviceDecentralizedIdentifier is Whitelist {
     mapping(bytes32 => address) public nameSpaceToSelfManagedAddress;
 
     event RegisterSelfManagedContract(bytes32 indexed nameSpace, address addr);
@@ -45,8 +45,8 @@ contract DecentralizedIdentifier is Whitelist {
         return getSelfManagedContract(nameSpace).getURI(did);
     }
 
-    function getSelfManagedContract(bytes32 nameSpace) private view returns (SelfManagedDID) {
+    function getSelfManagedContract(bytes32 nameSpace) private view returns (SelfManagedDeviceDID) {
         require(nameSpaceToSelfManagedAddress[nameSpace] != address(0), "name space does not exist");
-        return SelfManagedDID(nameSpaceToSelfManagedAddress[nameSpace]);
+        return SelfManagedDeviceDID(nameSpaceToSelfManagedAddress[nameSpace]);
     }
 }

@@ -1,8 +1,6 @@
 pragma solidity ^0.4.24;
 
-import './SelfManagedDID.sol';
-
-contract IoTeXDID is SelfManagedDID {
+contract IoTeXDID {
     modifier onlyDIDOwner(string didInput) {
         string memory didString = generateDIDString();
         if (bytes(didInput).length > 0) {

@@ -16,17 +16,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var CreateDIDCmd = &cobra.Command{
-	Use:   "create DID",
-	Short: "Create DID for io device",
-	Args:  cobra.MinimumNArgs(1),
+var CreateControllerDIDCmd = &cobra.Command{
+	Use:   "create-controller",
+	Short: "Create DID for controller",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cmd.SilenceUsage = true
-		return createDID()
+		return createControllerDID()
 	},
 }
 
-func createDID() error {
+func createControllerDID() error {
 	conn, err := iotex.NewDefaultGRPCConn(IOEndpoint)
 	if err != nil {
 		return errors.Wrap(err, "failed to set up grpc connection")
@@ -38,7 +37,7 @@ func createDID() error {
 		return errors.Wrap(err, "failed to get authed client")
 	}
 
-	caddr, err := address.FromString(ContractAddress)
+	caddr, err := address.FromString(ControllerContractAddress)
 	if err != nil {
 		return errors.Wrap(err, "failed to get contract address")
 	}
@@ -68,10 +67,10 @@ func createDID() error {
 		return err
 	}
 	if resp.ReceiptInfo.Receipt.Status != 1 {
-		return errors.Errorf("creating IoTeX DID failed: %x", h)
+		return errors.Errorf("creating controller DID failed: %x", h)
 	}
 
-	fmt.Println("Created DID:", DIDPrefix+strings.ToLower(ioCommonAddr.String()))
+	fmt.Println("Created controller DID:", ControllerDIDPrefix+strings.ToLower(ioCommonAddr.String()))
 	return nil
 }
 
@@ -79,16 +78,16 @@ var _hash string
 var _uri string
 
 func init() {
-	CreateDIDCmd.Flags().StringVarP(&_password, "password", "p", "", "password for keystore file")
-	if err := CreateDIDCmd.MarkFlagRequired("password"); err != nil {
+	CreateControllerDIDCmd.Flags().StringVarP(&_password, "password", "p", "", "password for keystore file")
+	if err := CreateControllerDIDCmd.MarkFlagRequired("password"); err != nil {
 		log.Fatal(err.Error())
 	}
-	CreateDIDCmd.Flags().StringVar(&_hash, "hash", "", "document hash")
-	if err := CreateDIDCmd.MarkFlagRequired("hash"); err != nil {
+	CreateControllerDIDCmd.Flags().StringVar(&_hash, "hash", "", "document hash")
+	if err := CreateControllerDIDCmd.MarkFlagRequired("hash"); err != nil {
 		log.Fatal(err.Error())
 	}
-	CreateDIDCmd.Flags().StringVarP(&_uri, "uri", "u", "", "document uri")
-	if err := CreateDIDCmd.MarkFlagRequired("uri"); err != nil {
+	CreateControllerDIDCmd.Flags().StringVarP(&_uri, "uri", "u", "", "document uri")
+	if err := CreateControllerDIDCmd.MarkFlagRequired("uri"); err != nil {
 		log.Fatal(err.Error())
 	}
 }

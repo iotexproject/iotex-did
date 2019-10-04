@@ -13,17 +13,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var GetDIDCmd = &cobra.Command{
-	Use:   "get DID",
-	Short: "Get DID document hash and URI for io device",
-	Args:  cobra.MinimumNArgs(1),
+var GetDeviceDIDCmd = &cobra.Command{
+	Use:   "get-device",
+	Short: "Get DID document hash and URI for device",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cmd.SilenceUsage = true
-		return getHash()
+		return getDeviceDID()
 	},
 }
 
-func getHash() error {
+func getDeviceDID() error {
 	conn, err := iotex.NewDefaultGRPCConn(IOEndpoint)
 	if err != nil {
 		return errors.Wrap(err, "failed to set up grpc connection")
@@ -35,18 +34,18 @@ func getHash() error {
 		return errors.Wrap(err, "failed to get authed client")
 	}
 
-	caddr, err := address.FromString(OperatorContractAddress)
+	caddr, err := address.FromString(DeviceOperatorContractAddress)
 	if err != nil {
 		return errors.Wrap(err, "failed to get contract address")
 	}
 
 	ctx := context.Background()
-	didABI, err := abi.JSON(strings.NewReader(DecentralizedIdentifierABI))
+	didABI, err := abi.JSON(strings.NewReader(DeviceDecentralizedIdentifierABI))
 	if err != nil {
 		return errors.Wrap(err, "failed to parse DID ABI")
 	}
 
-	data, err := c.Contract(caddr, didABI).Read("getHash", stringToBytes32(_namespace), _didString).Call(ctx)
+	data, err := c.Contract(caddr, didABI).Read("getHash", stringToBytes32(_namespace), _deviceDID).Call(ctx)
 	if err != nil {
 		return errors.Wrap(err, "failed to get DID document hash")
 	}
@@ -55,7 +54,7 @@ func getHash() error {
 		return errors.Wrap(err, "failed to unmarshal hash")
 	}
 
-	data, err = c.Contract(caddr, didABI).Read("getURI", stringToBytes32(_namespace), _didString).Call(ctx)
+	data, err = c.Contract(caddr, didABI).Read("getURI", stringToBytes32(_namespace), _deviceDID).Call(ctx)
 	if err != nil {
 		return errors.Wrap(err, "failed to get DID document URI")
 	}
@@ -70,19 +69,19 @@ func getHash() error {
 }
 
 var _namespace string
-var _didString string
+var _deviceDID string
 
 func init() {
-	GetDIDCmd.Flags().StringVarP(&_password, "password", "p", "", "password for keystore file")
-	if err := GetDIDCmd.MarkFlagRequired("password"); err != nil {
+	GetDeviceDIDCmd.Flags().StringVarP(&_password, "password", "p", "", "password for keystore file")
+	if err := GetDeviceDIDCmd.MarkFlagRequired("password"); err != nil {
 		log.Fatal(err.Error())
 	}
-	GetDIDCmd.Flags().StringVarP(&_namespace, "namespace", "n", "", "DID namespace")
-	if err := GetDIDCmd.MarkFlagRequired("namespace"); err != nil {
+	GetDeviceDIDCmd.Flags().StringVarP(&_namespace, "namespace", "n", "", "device DID namespace")
+	if err := GetDeviceDIDCmd.MarkFlagRequired("namespace"); err != nil {
 		log.Fatal(err.Error())
 	}
-	GetDIDCmd.Flags().StringVarP(&_didString, "did-string", "d", "", "DID string")
-	if err := GetDIDCmd.MarkFlagRequired("did-string"); err != nil {
+	GetDeviceDIDCmd.Flags().StringVarP(&_deviceDID, "did-string", "d", "", "DID string")
+	if err := GetDeviceDIDCmd.MarkFlagRequired("did-string"); err != nil {
 		log.Fatal(err.Error())
 	}
 }
