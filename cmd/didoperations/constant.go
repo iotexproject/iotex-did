@@ -926,9 +926,9 @@ const (
     }
   ]`
 
-	ControllerContractAddress         = "io18hknrr046trhwr4whuc8dp4jlrvml3sz9a70mm"
-	DeviceOperatorContractAddress = "io1h5ev9vwcfrwyv3v8k7tuj6enn6czaqu3uug6ke"
-	MockDeviceContractAddress = "io1all8tkuncgsnjmhzhlgghf4nuf0mayuczzsql9"
+	ControllerContractAddress         = "io15kftve6k3nrwccwsahq205gckavzn8mkuf2ws3"
+	DeviceOperatorContractAddress = "io1saftaaamturktykv27ftj32ckj86sqly0tgwjj"
+	MockDeviceContractAddress = "io1zegt9x0kkt6v60d9c87aq96q3h63qv9wdjwkhe"
 	ControllerDIDPrefix               = "did:io:"
 	MockDeviceDIDPrefix = "did:io:mock:"
 	IOEndpoint              = "api.testnet.iotex.one:443"
