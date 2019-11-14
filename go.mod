@@ -12,6 +12,5 @@ require (
 	github.com/pkg/errors v0.8.1
 	github.com/spf13/cobra v0.0.5
 	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4 // indirect
-	google.golang.org/appengine v1.4.0 // indirect
 	google.golang.org/grpc v1.20.1
 )
