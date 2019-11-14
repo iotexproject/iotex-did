@@ -11,7 +11,7 @@ contract TrackerService is Whitelist {
     event RequestDataPointAccess(string indexed publicKey, uint256 expirationTime);
     event ShareAccessToken(string associationToken, string indexed tokenUserPublicKey);
 
-    constructor(uint256 _unitPrice, uint256 _maximumAccessPeriod) {
+    constructor(uint256 _unitPrice, uint256 _maximumAccessPeriod) public {
         addAddressToWhitelist(msg.sender);
         unitPrice = _unitPrice;
         maximumAccessPeriod = _maximumAccessPeriod;
