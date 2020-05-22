@@ -91,7 +91,7 @@ createDID("0x5576E95935366Ebd2637D9171E4C92e60598be10", "8806157fdcbcea265623576
 Note that id argument is optional because the contract will use the caller's address anyway. Once a DID is registered, the provided DID document hash and URI would be stored in the contract along the unique DID string.
 
 ### Read
-IoTeX clients can query a DID's current hash and URI given a DID string wheter they own the DID or not. 
+IoTeX clients can query a DID's current hash and URI given a DID string whether they own the DID or not. 
 Here is a draft DID hash/URI read implementation:
 ```
 // For reference only and subject to change
