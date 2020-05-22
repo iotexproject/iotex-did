@@ -130,7 +130,7 @@ function updateURI(string did, string uri) public onlyDIDOwner(did) {
     dids[generateDIDString()].uri = uri;
 }
 ```
-Similar to the case of DID registration, id argument is optional for the update functions as well because the contract would use caller's address to derive the DID string.  
+Similar to the case of DID registration, did argument is optional for the update functions as well because the contract would use caller's address to derive the DID string.
 
 ## Delete
 A registered DID can be deactivated anytime as long as the caller's address matches the address within the DID string. Once a DID is deactivated, the metadata of the corresponding document cannot be updated.
