@@ -10,9 +10,19 @@ contract DIDStorage is Ownable {
         string uri;
     }
     mapping(string => DID) dids;
+    // For authentication purpose
+    mapping(address => uint256) nonces;
 
     function exist(string memory did) public view returns (bool) {
         return dids[did].exist;
+    }
+
+    function getNonce(address owner) public view returns (uint256) {
+        return nonces[owner];
+    }
+
+    function bumpNonce(address owner) public onlyOwner {
+        nonces[owner] = nonces[owner] + 1;
     }
 
     function upsert(string memory did, address owner, bytes32 hash, string memory uri) public onlyOwner {

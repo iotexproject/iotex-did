@@ -1,11 +1,13 @@
 pragma solidity >=0.4.22 <0.6.0;
 
-import './PrivateDIDManager.sol';
 import './Agentable.sol';
+import './DIDManagerBase.sol';
 
-contract UCamDIDManager is Agentable, PrivateDIDManager {
+contract UCamDIDManager is Agentable, DIDManagerBase {
 
-    constructor(address _dbAddr) PrivateDIDManager("ucam", _dbAddr) public {}
+    constructor(address _dbAddr) DIDBase(_dbAddr) public {
+        prefix = "ucam";
+    }
 
     function formDID(string memory uid) public view returns (string memory) {
         bytes memory ds = bytes(uid);

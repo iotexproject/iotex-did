@@ -6,6 +6,7 @@ contract PebbleDIDManager is PrivateDIDManager {
     constructor(address _dbAddr) PrivateDIDManager("did:io:pebble:", _dbAddr) public {}
 
     function formDID(string memory id) public view returns (string memory) {
+        // TODO: verify id format
         return string(abi.encodePacked(prefix, id));
     }
     /*
