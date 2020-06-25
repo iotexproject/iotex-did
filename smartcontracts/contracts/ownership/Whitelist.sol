@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity >=0.4.22 <0.6.0;
 
 
 import "./Ownable.sol";
@@ -42,7 +42,7 @@ contract Whitelist is Ownable {
    * @return true if at least one address was added to the whitelist,
    * false if all addresses were already in the whitelist
    */
-  function addAddressesToWhitelist(address[] addrs) onlyOwner public returns(bool success) {
+  function addAddressesToWhitelist(address[] memory addrs) onlyOwner public returns(bool success) {
     for (uint256 i = 0; i < addrs.length; i++) {
       if (addAddressToWhitelist(addrs[i])) {
         success = true;
@@ -70,7 +70,7 @@ contract Whitelist is Ownable {
    * @return true if at least one address was removed from the whitelist,
    * false if all addresses weren't in the whitelist in the first place
    */
-  function removeAddressesFromWhitelist(address[] addrs) onlyOwner public returns(bool success) {
+  function removeAddressesFromWhitelist(address[] memory addrs) onlyOwner public returns(bool success) {
     for (uint256 i = 0; i < addrs.length; i++) {
       if (removeAddressFromWhitelist(addrs[i])) {
         success = true;
