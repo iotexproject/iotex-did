@@ -5,9 +5,19 @@ import './PrivateDIDManager.sol';
 contract PebbleDIDManager is PrivateDIDManager {
     constructor(address _dbAddr) PrivateDIDManager("did:io:pebble:", _dbAddr) public {}
 
-    function formDID(string memory id) public view returns (string memory) {
+    function getInternalKey(bytes memory id) internal view returns (bytes20) {
+        return ripemd160(id);
+    }
+
+    function formDID(bytes memory id) public view returns (bytes memory) {
+        // TODO: convert bytes to string
+        return abi.encodePacked(db.getPrefix(), id);
+    }
+
+    function decodeInternalKey(bytes memory did) public view returns (bytes20) {
         // TODO: verify id format
-        return string(abi.encodePacked(prefix, id));
+        require(hasPrefix(did, db.getPrefix()), "invalid DID");
+        return getInternalKey(slice(did, db.getPrefix().length));
     }
     /*
     function verifyDID(string memory did) public view returns (bool) {

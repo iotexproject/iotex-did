@@ -9,7 +9,7 @@ interface IDID {
     event DIDUpdated(address indexed operator, string indexed did, bytes32 hash, string uri);
     event DIDDeleted(address indexed operator, string indexed did);
 
-    function getHash(string calldata) external view returns (bytes32);
-    function getURI(string calldata) external view returns (string memory);
-    function getOwner(string calldata) external view returns (address);
+    function getHash(bytes calldata) external view returns (bytes32);
+    function getURI(bytes calldata) external view returns (bytes memory);
+    function getOwner(bytes calldata) external view returns (address);
 }

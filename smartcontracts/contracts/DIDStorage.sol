@@ -3,37 +3,38 @@ pragma solidity >=0.4.22 <0.6.0;
 import './ownership/Ownable.sol';
 
 contract DIDStorage is Ownable {
+    bytes private prefix;
+
     struct DID {
         bool exist;
         address owner;
         bytes32 hash;
-        string uri;
+        bytes uri;
     }
-    mapping(string => DID) dids;
-    // For authentication purpose
-    mapping(address => uint256) nonces;
+    mapping(bytes20 => DID) dids;
 
-    function exist(string memory did) public view returns (bool) {
-        return dids[did].exist;
+    constructor(bytes memory _prefix) public {
+        setPrefix(_prefix);
     }
 
-    function getNonce(address owner) public view returns (uint256) {
-        return nonces[owner];
+    function exist(bytes20 internalDID) public view returns (bool) {
+        return dids[internalDID].exist;
     }
 
-    function bumpNonce(address owner) public onlyOwner {
-        nonces[owner] = nonces[owner] + 1;
+    function setPrefix(bytes memory _prefix) public onlyOwner {
+        prefix = _prefix;
     }
 
-    function upsert(string memory did, address owner, bytes32 hash, string memory uri) public onlyOwner {
-        dids[did] = DID(true, owner, hash, uri);
+    function getPrefix() public view returns (bytes memory) {
+        return prefix;
     }
 
-    function deactivate(string memory did) public onlyOwner {
-        dids[did].exist = false;
+    function upsert(bytes20 internalDID, bool isExist, address owner, bytes32 hash, bytes memory uri) public onlyOwner {
+        dids[internalDID] = DID(isExist, owner, hash, uri);
     }
 
-    function get(string memory did) public view returns (address, bytes32, string memory) {
-        return (dids[did].owner, dids[did].hash, dids[did].uri);
+    function get(bytes20 internalDID) public view returns (address, bytes32, bytes memory) {
+        require(exist(internalDID), "DID does not exist");
+        return (dids[internalDID].owner, dids[internalDID].hash, dids[internalDID].uri);
     }
 }

@@ -2,17 +2,17 @@ pragma solidity >=0.4.22 <0.6.0;
 
 contract Agentable {
 
-    function getDeleteAuthMessage(string memory did, address agent) public view returns (bytes memory) {
+    function getDeleteAuthMessage(bytes memory did, address agent) public view returns (bytes memory) {
         return abi.encodePacked(
             "I authorize ", addrToString(agent), " to delete DID ", did, " in contract ", addrToString(address(this)));
     }
 
-    function getCreateAuthMessage(string memory did, bytes32 h, string memory uri, address agent) public view returns (bytes memory) {
+    function getCreateAuthMessage(bytes memory did, bytes32 h, bytes memory uri, address agent) public view returns (bytes memory) {
         return abi.encodePacked(
             "I authorize ", addrToString(agent), " to create DID ", did, " in contract with ", addrToString(address(this)), " (", h, ", ", uri, ")");
     }
 
-    function getUpdateAuthMessage(string memory did, bytes32 h, string memory uri, address agent) public view returns (bytes memory) {
+    function getUpdateAuthMessage(bytes memory did, bytes32 h, bytes memory uri, address agent) public view returns (bytes memory) {
         return abi.encodePacked(
             "I authorize ", addrToString(agent), " to update DID ", did, " in contract to ", addrToString(address(this)), " (", h, ", ", uri, ")");
     }

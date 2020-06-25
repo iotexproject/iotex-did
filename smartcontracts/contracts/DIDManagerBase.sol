@@ -4,26 +4,26 @@ import './DIDBase.sol';
 
 // DIDManagerBase is an implementation of IDID which is only updatable by owner
 contract DIDManagerBase is DIDBase {
-    function internalCreateDID(string memory did, address didOwner, bytes32 h, string memory uri) internal {
-        require(!db.exist(did), "duplicate did");
-        db.upsert(did, didOwner, h, uri);
+    function internalCreateDID(bytes memory did, bytes20 internalKey, address didOwner, bytes32 h, bytes memory uri) internal {
+        require(!db.exist(internalKey), "duplicate DID");
+        db.upsert(internalKey, true, didOwner, h, uri);
 
-        emit DIDCreated(didOwner, did, h, uri);
+        emit DIDCreated(didOwner, string(did), h, string(uri));
     }
 
-    function internalUpdateDID(string memory did, address didOwner, bytes32 h, string memory uri) internal {
-        require(db.exist(did), "did does not exist");
-        (address ownerAddr, ,) = db.get(did);
+    function internalUpdateDID(bytes memory did, bytes20 internalKey, address didOwner, bytes32 h, bytes memory uri) internal {
+        require(db.exist(internalKey), "DID does not exist");
+        (address ownerAddr, ,) = db.get(internalKey);
         require(ownerAddr == didOwner, "no permission");
-        db.upsert(did, didOwner, h, uri);
-        emit DIDUpdated(didOwner, did, h, uri);
+        db.upsert(internalKey, true, didOwner, h, uri);
+        emit DIDUpdated(didOwner, string(did), h, string(uri));
     }
 
-    function internalDeleteDID(string memory did, address didOwner) internal {
-        require(db.exist(did), "did does not exist");
-        (address ownerAddr, ,) = db.get(did);
+    function internalDeleteDID(bytes memory did, bytes20 internalKey, address didOwner) internal {
+        require(db.exist(internalKey), "DID does not exist");
+        (address ownerAddr, bytes32 h, bytes memory uri) = db.get(internalKey);
         require(ownerAddr == didOwner, "no permission");
-        db.deactivate(did);
-        emit DIDDeleted(msg.sender, did);
+        db.upsert(internalKey, false, didOwner, h, uri);
+        emit DIDDeleted(msg.sender, string(did));
     }
 }

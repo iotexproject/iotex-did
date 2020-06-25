@@ -5,36 +5,50 @@ import './DIDManagerBase.sol';
 
 contract UCamDIDManager is Agentable, DIDManagerBase {
 
-    constructor(address _dbAddr) DIDBase(_dbAddr) public {
-        prefix = "ucam";
+    constructor(address _dbAddr) DIDBase(_dbAddr, "did:io:ucam") public {}
+
+    function formDID(bytes20 uid) internal view returns (bytes memory) {
+        // TODO: convert uid to string
+        return abi.encodePacked(db.getPrefix(), uid);
     }
 
-    function formDID(string memory uid) public view returns (string memory) {
-        bytes memory ds = bytes(uid);
-        require(ds.length == 20, "invalid uid length");
-        for (uint i = 0; i < ds.length; i++) {
-            require(ds[i] >= 'A' && ds[i] <= 'Z' || ds[i] >= '0' && ds[i] <= '9', "invalid uid format");
+    function decodeInternalKey(bytes memory did) public view returns (bytes20) {
+        require(hasPrefix(did, db.getPrefix()), "invalid DID");
+        bytes memory domainID = (slice(did, db.getPrefix().length));
+        require(domainID.length == 40, "invalid DID");
+        uint160 uid = 0;
+        uint160 b1;
+        uint160 b2;
+        for (uint i = 0; i < 40; i += 2){
+            uid *= 256;
+            b1 = uint8(domainID[i]);
+            b2 = uint8(domainID[i+1]);
+            if ((b1 >= 97)&&(b1 <= 102)) b1 -= 87;
+            else if ((b1 >= 48)&&(b1 <= 57)) b1 -= 48;
+            if ((b2 >= 97)&&(b2 <= 102)) b2 -= 87;
+            else if ((b2 >= 48)&&(b2 <= 57)) b2 -= 48;
+            uid += (b1*16+b2);
         }
-        return string(abi.encodePacked(prefix, uid));
+        return bytes20(uid);
     }
 
-    function createDIDByAgent(string memory uid, bytes32 h, string memory uri, address authorizer, bytes memory auth) public {
-        string memory did = formDID(uid);
+    function createDIDByAgent(bytes20 uid, bytes32 h, bytes memory uri, address authorizer, bytes memory auth) public {
+        bytes memory did = formDID(uid);
         require(msg.sender == getSigner(getCreateAuthMessage(did, h, uri, msg.sender), auth), "invalid signature");
-        internalCreateDID(did, authorizer, h, uri);
+        internalCreateDID(did, uid, authorizer, h, uri);
     }
 
-    function updateDIDByAgent(string memory uid, bytes32 h, string memory uri, bytes memory auth) public {
-        string memory did = formDID(uid);
-        (address authorizer, ,) = db.get(did);
+    function updateDIDByAgent(bytes20 uid, bytes32 h, bytes memory uri, bytes memory auth) public {
+        bytes memory did = formDID(uid);
+        (address authorizer, ,) = db.get(uid);
         require(msg.sender == getSigner(getUpdateAuthMessage(did, h, uri, msg.sender), auth), "invalid signature");
-        internalUpdateDID(did, authorizer, h, uri);
+        internalUpdateDID(did, uid, authorizer, h, uri);
     }
 
-    function deleteDIDByAgent(string memory uid, bytes memory auth) public {
-        string memory did = formDID(uid);
-        (address authorizer, ,) = db.get(did);
+    function deleteDIDByAgent(bytes20 uid, bytes memory auth) public {
+        bytes memory did = formDID(uid);
+        (address authorizer, ,) = db.get(uid);
         require(msg.sender == getSigner(getDeleteAuthMessage(did, msg.sender), auth), "invalid signature");
-        internalDeleteDID(did, authorizer);
+        internalDeleteDID(did, uid, authorizer);
     }
 }
