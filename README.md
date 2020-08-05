@@ -5,15 +5,15 @@
 # IoTeX DID Method Specification
 
 ## Status
-This document is a work in progress draft. **Last updated at 12 Sep 2019**.
+This document is a work in progress draft. **Last updated at 5 Aug 2020**.
 
-Self-sovereign identity is a user- and device-centric identity concept where an individual or organization or device is able to control its own identity attributes. Decentralized Identifiers (DIDs) are a new type of identifier for verifiable 'self-sovereign' digital identity for individuals, organizations and things. DIDs have the following important properties:
-- Decentralized: DIDs are designed to function without a central registration authority. DIDs are registered in blockchain or other decentralized network.
-- Cryptographically Verifiable: DIDs are designed to be associated with cryptographic keys and the entities controlling the DID can use those keys to prove ownership.
-- Non-Reassignable: DIDs should be permanent, persistent, and non-reassignable.
-- Resolvable: DIDs are made useful through resolution.
+Self-sovereign identity is user- and device-centric where an individual or organization or device is able to own its own identity attributes without relying on third-party service providers. Decentralized Identifiers (DIDs) are a new type of identifier for verifiable 'self-sovereign' digital identity for individuals, organizations and things. DIDs have the following important properties:
+- **Decentralized**: DIDs are designed to function without a central registration authority. DIDs are registered in blockchain or other decentralized network.
+- **Cryptographically Verifiable**: DIDs are designed to be associated with cryptographic keys and the entities controlling the DID can use those keys to prove ownership.
+- **Non-Reassignable**: DIDs should be permanent, persistent, and non-reassignable.
+- **Resolvable**: DIDs are made useful through resolution.
 
-This document provides specification of how DID works within IoTeX Network. In IoTeX DID system, we allow each manufacture or namespace to store and manage DIDs through its self-managed DID smart contract. Every self-managed smart contract has to implement the SelfManagedDID interface defined as follows:
+This document provides specification of how DID works within IoTeX Network. Our DID design allows each manufacture or entity to have its own namespace, which stores and manages DIDs through a self-managed DID contract. A self-managed contract could have customized business logic to adapt the application's needs but has to implement the SelfManagedDID interface, defined as follows:
 
 ```
 interface SelfManagedDID {
