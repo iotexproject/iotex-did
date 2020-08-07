@@ -1,11 +1,11 @@
 # Deployment of DID Contract
 
-## install solc and ioctl
+## Install solc and ioctl
 install solc according to https://docs.iotex.io/docs/ioctl.html#smart-contract
 
 install ioctl according to https://docs.iotex.io/docs/ioctl.html#overview
 
-## deploy contract
+## Deploy contract
 
 1. First we need cd to smartcontracts/contracts directory.
 
