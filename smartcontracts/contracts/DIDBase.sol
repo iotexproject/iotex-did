@@ -13,6 +13,7 @@ contract DIDBase is IDID, Ownable {
             db = new DIDStorage(prefix);
         } else {
             db = DIDStorage(dbAddr);
+            require(keccak256(prefix) == keccak256(db.getPrefix()));
         }
     }
 
