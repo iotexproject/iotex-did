@@ -4,12 +4,18 @@ import './Agentable.sol';
 import './DIDManagerBase.sol';
 
 contract UCamDIDManager is Agentable, DIDManagerBase {
+    bytes private alphabet = "0123456789abcdef";
 
     constructor(address _dbAddr) DIDBase(_dbAddr, "did:io:ucam") public {}
 
     function formDID(bytes20 uid) internal view returns (bytes memory) {
-        // TODO: convert uid to string
-        return abi.encodePacked(db.getPrefix(), uid);
+
+        bytes memory str = new bytes(40);
+        for (uint i = 0; i < 20; i++) {
+            str[i*2] = alphabet[uint8(uid[i] >> 4)];
+            str[1+i*2] = alphabet[uint8(uid[i] & 0x0f)];
+        }
+        return abi.encodePacked(db.getPrefix(), string(str));
     }
 
     function decodeInternalKey(bytes memory did) public view returns (bytes20) {
